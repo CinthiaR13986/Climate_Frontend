@@ -1,6 +1,6 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize, forkJoin } from 'rxjs';
+import { buffer, debounceTime, filter, finalize, forkJoin } from 'rxjs';
 import { ApiError } from '../../../core/http/api-error.model';
 import { RealtimeService } from '../../../core/realtime/realtime.service';
 import { AlertResponse } from '../../alerts/models/alert.models';
@@ -23,6 +23,7 @@ export class DashboardStore {
   private readonly sensorsState = signal<readonly SensorResponse[]>([]);
   private readonly alertsState = signal<readonly AlertResponse[]>([]);
   private readonly simulationState = signal<SimulationStatusResponse | null>(null);
+  private realtimeBound = false;
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -58,7 +59,19 @@ export class DashboardStore {
   }
 
   private bindRealtime(): void {
-    this.realtime.readingUpdated$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(reading => this.readingsState.update(items => [reading, ...items.filter(item => item.sensorId !== reading.sensorId)]));
+    if (this.realtimeBound) return;
+    this.realtimeBound = true;
+
+    const readingUpdates = this.realtime.readingUpdated$;
+    readingUpdates.pipe(
+      buffer(readingUpdates.pipe(debounceTime(500))),
+      filter(readings => readings.length > 0),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(readings => this.readingsState.update(items => {
+      const readingsBySensor = new Map(items.map(reading => [reading.sensorId, reading]));
+      readings.forEach(reading => readingsBySensor.set(reading.sensorId, reading));
+      return [...readingsBySensor.values()];
+    }));
     this.realtime.alertGenerated$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(alert => this.alertsState.update(items => [alert, ...items.filter(item => item.id !== alert.id)]));
     this.realtime.sensorStatusChanged$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(status => this.sensorsState.update(items => items.map(sensor => sensor.id === status.id ? { ...sensor, isActive: status.isActive } : sensor)));
     this.realtime.systemReset$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(status => { this.simulationState.set(status); this.readingsState.set([]); });
