@@ -1,0 +1,20 @@
+<div class="flex h-full flex-col bg-slate-950 text-slate-300">
+  <a routerLink="/dashboard" class="flex min-h-20 items-center gap-3 border-b border-slate-800/80 px-5" (click)="navigate.emit()">
+    <span class="grid size-10 place-items-center rounded-xl bg-cyan-400/10 font-semibold text-cyan-300" aria-hidden="true">CM</span>
+    <span><strong class="block text-sm text-white">Climate Monitor</strong><small class="text-xs text-slate-500">Alerta temprana</small></span>
+  </a>
+  <nav class="flex-1 overflow-y-auto px-3 py-5" aria-label="Navegación principal">
+    <a routerLink="/dashboard" routerLinkActive="bg-cyan-400/10 text-cyan-200" [routerLinkActiveOptions]="{ exact: true }" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition hover:bg-slate-900 hover:text-white" (click)="navigate.emit()"><app-nav-icon name="dashboard" /> Dashboard</a>
+    <p class="mb-2 mt-7 px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-slate-600">Monitoreo</p>
+    @for (item of monitoringNav; track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="bg-cyan-400/10 text-cyan-200" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition hover:bg-slate-900 hover:text-white" (click)="navigate.emit()"><app-nav-icon [name]="item.icon" /> {{ item.label }}</a>
+    }
+    @if (authStore.isAdministrator()) {
+      <p class="mb-2 mt-7 px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-slate-600">Administración</p>
+      @for (item of adminNav; track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="bg-cyan-400/10 text-cyan-200" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition hover:bg-slate-900 hover:text-white" (click)="navigate.emit()"><app-nav-icon [name]="item.icon" /> {{ item.label }}</a>
+      }
+    }
+  </nav>
+  <div class="border-t border-slate-800/80 p-3"><button type="button" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-slate-900 hover:text-white focus-visible:outline-2 focus-visible:outline-cyan-400" (click)="logout()"><app-nav-icon name="logout" /> Cerrar sesión</button></div>
+</div>

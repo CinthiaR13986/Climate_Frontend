@@ -1,0 +1,4 @@
+<div class="relative h-72 w-full">
+  <canvas #canvas aria-label="Gráfica histórica del sensor" role="img"></canvas>
+  @if (!data()?.data?.length) { <div class="absolute inset-0 grid place-items-center rounded-xl bg-slate-50 text-center"><div><p class="font-medium text-slate-700">Sin datos para graficar</p><p class="mt-1 text-sm text-slate-500">Ajusta el rango o espera nuevas lecturas.</p></div></div> }
+</div>

@@ -1,0 +1,8 @@
+<section class="pointer-events-none fixed inset-x-4 top-4 z-50 ml-auto flex max-w-sm flex-col gap-3" aria-label="Notificaciones" aria-live="polite">
+  @for (toast of toastService.messages(); track toast.id) {
+    <div class="pointer-events-auto flex items-start gap-3 rounded-xl border bg-white p-4 text-sm shadow-lg" [class.border-emerald-200]="toast.kind === 'success'" [class.border-red-200]="toast.kind === 'error'" role="status">
+      <p class="min-w-0 flex-1 text-slate-700">{{ toast.message }}</p>
+      <button type="button" class="rounded text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-cyan-600" aria-label="Cerrar notificación" (click)="toastService.dismiss(toast.id)">×</button>
+    </div>
+  }
+</section>

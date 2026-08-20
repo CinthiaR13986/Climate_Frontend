@@ -1,0 +1,140 @@
+<div class="space-y-6">
+  <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-cyan-700">Inventario</p>
+      <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Sensores</h1>
+      <p class="mt-2 text-slate-600">Administra los dispositivos registrados en las comunidades.</p>
+    </div>
+    @if (authStore.canOperate()) {
+      <a
+        routerLink="/sensors/new"
+        class="rounded-xl bg-cyan-700 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-cyan-800"
+        >Nuevo sensor</a
+      >
+    }
+  </header>
+  @if (error()) {
+    <div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      {{ error() }}
+    </div>
+  }
+  <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-200 p-5">
+      <label class="block max-w-md text-sm font-medium text-slate-700"
+        >Buscar<input
+          type="search"
+          class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2.5"
+          placeholder="Nombre, código, tipo o comunidad"
+          [ngModel]="query()"
+          (ngModelChange)="updateQuery($event)"
+      /></label>
+    </div>
+    @if (loading()) {
+      <p class="p-10 text-center text-slate-500" role="status">Cargando sensores…</p>
+    } @else {
+      <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Tabla de sensores desplazable">
+        <table class="w-full min-w-4xl text-left text-sm">
+          <thead class="bg-slate-50 text-slate-600">
+            <tr>
+              <th class="px-5 py-3 font-medium">Sensor</th>
+              <th class="px-5 py-3 font-medium">Tipo</th>
+              <th class="px-5 py-3 font-medium">Comunidad</th>
+              <th class="px-5 py-3 font-medium">Estado</th>
+              <th class="px-5 py-3 font-medium">Actualizado</th>
+              <th class="px-5 py-3 text-right font-medium">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @for (sensor of filtered(); track sensor.id) {
+              <tr>
+                <td class="px-5 py-4">
+                  <a
+                    [routerLink]="['/sensors', sensor.id]"
+                    class="font-semibold text-cyan-800 hover:underline"
+                    >{{ sensor.name || 'Sin nombre' }}</a
+                  >
+                  <p class="text-xs text-slate-500">{{ sensor.code || 'Sin código' }}</p>
+                </td>
+                <td class="px-5 py-4">{{ labels[sensor.type] }} · {{ sensor.unit }}</td>
+                <td class="px-5 py-4">{{ sensor.communityName || 'Sin comunidad' }}</td>
+                <td class="px-5 py-4">
+                  <span
+                    class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                    [class.bg-emerald-100]="sensor.isActive"
+                    [class.text-emerald-800]="sensor.isActive"
+                    [class.bg-slate-200]="!sensor.isActive"
+                    >{{ sensor.isActive ? 'Activo' : 'Inactivo' }}</span
+                  >
+                </td>
+                <td class="px-5 py-4 text-slate-600">
+                  {{ sensor.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td class="px-5 py-4">
+                  <div class="flex justify-end gap-2">
+                    @if (authStore.canOperate()) {
+                      <a
+                        [routerLink]="['/sensors', sensor.id, 'edit']"
+                        class="rounded-lg border border-slate-300 px-3 py-2 font-semibold"
+                        >Editar</a
+                      ><button
+                        type="button"
+                        class="rounded-lg border border-slate-300 px-3 py-2 font-semibold disabled:opacity-50"
+                        [disabled]="mutatingId() === sensor.id"
+                        (click)="changeStatus(sensor)"
+                      >
+                        {{ sensor.isActive ? 'Desactivar' : 'Activar' }}</button
+                      ><button
+                        type="button"
+                        class="rounded-lg border border-red-300 px-3 py-2 font-semibold text-red-700"
+                        (click)="deleting.set(sensor)"
+                      >
+                        Eliminar
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-5 py-12 text-center text-slate-500">
+                  No se encontraron sensores.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>
+@if (deleting(); as sensor) {
+  <div
+    class="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-title"
+  >
+    <div class="w-full max-w-md rounded-2xl bg-white p-6">
+      <h2 id="delete-title" class="text-xl font-semibold">¿Eliminar {{ sensor.name }}?</h2>
+      <p class="mt-3 text-sm text-slate-600">
+        El backend decidirá si el sensor puede eliminarse según sus datos relacionados.
+      </p>
+      <div class="mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          class="rounded-xl px-4 py-2.5 font-semibold"
+          (click)="deleting.set(null)"
+        >
+          Cancelar</button
+        ><button
+          type="button"
+          class="rounded-xl bg-red-700 px-4 py-2.5 font-semibold text-white"
+          [disabled]="mutatingId() === sensor.id"
+          (click)="confirmDelete()"
+        >
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+}

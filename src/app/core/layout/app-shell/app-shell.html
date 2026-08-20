@@ -1,0 +1,12 @@
+<div class="min-h-dvh bg-slate-50">
+  <a href="#main-content" class="fixed left-4 top-3 z-[100] -translate-y-20 rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white transition focus:translate-y-0">Saltar al contenido principal</a>
+  <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 lg:block"><app-sidebar /></aside>
+  @if (menuOpen()) {
+    <button type="button" class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-[1px] lg:hidden" aria-label="Cerrar navegación" (click)="closeMenu()"></button>
+    <aside #mobileNavigation id="mobile-navigation" class="fixed inset-y-0 left-0 z-50 w-[min(18rem,85vw)] shadow-2xl lg:hidden" role="dialog" aria-modal="true" aria-label="Menú móvil" tabindex="-1"><app-sidebar (navigate)="closeMenu()" /></aside>
+  }
+  <div class="min-h-dvh lg:pl-64" [attr.inert]="menuOpen() ? '' : null">
+    <app-topbar (menuToggle)="menuOpen.set(true)" />
+    <main class="mx-auto w-full max-w-[100rem] p-4 sm:p-6 lg:p-8" id="main-content" tabindex="-1"><router-outlet /></main>
+  </div>
+</div>

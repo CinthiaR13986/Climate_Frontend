@@ -1,0 +1,147 @@
+<div class="space-y-6">
+  <header>
+    <p class="text-sm font-semibold uppercase tracking-[0.16em] text-cyan-700">
+      Trazabilidad climática
+    </p>
+    <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Historial de eventos</h1>
+    <p class="mt-2 text-slate-600">
+      Consulta cronológicamente los riesgos detectados y su resolución.
+    </p>
+  </header>
+  @if (error()) {
+    <div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      {{ error() }}
+    </div>
+  }
+  <form
+    class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+    [formGroup]="filters"
+    (ngSubmit)="applyFilters()"
+  >
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <label class="text-sm font-medium text-slate-700"
+        >Riesgo<select
+          class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5"
+          formControlName="riskType"
+        >
+          <option value="">Todos</option>
+          @for (risk of riskTypes; track risk) {
+            <option [value]="risk">{{ riskLabels[risk] }}</option>
+          }
+        </select></label
+      ><label class="text-sm font-medium text-slate-700"
+        >Nivel<select
+          class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5"
+          formControlName="alertLevel"
+        >
+          <option value="">Todos</option>
+          @for (level of levels; track level) {
+            <option [value]="level">{{ levelLabels[level] }}</option>
+          }
+        </select></label
+      ><label class="text-sm font-medium text-slate-700"
+        >Sensor<select
+          class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5"
+          formControlName="sensorId"
+        >
+          <option value="">Todos</option>
+          @for (sensor of sensors(); track sensor.id) {
+            <option [value]="sensor.id">{{ sensor.name || sensor.code }}</option>
+          }
+        </select></label
+      ><label class="text-sm font-medium text-slate-700"
+        >Comunidad<select
+          class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5"
+          formControlName="communityId"
+        >
+          <option value="">Todas</option>
+          @for (community of communities(); track community.id) {
+            <option [value]="community.id">{{ community.name }}</option>
+          }
+        </select></label
+      ><label class="text-sm font-medium text-slate-700"
+        >Desde<input
+          type="datetime-local"
+          class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2.5"
+          formControlName="from" /></label
+      ><label class="text-sm font-medium text-slate-700"
+        >Hasta<input
+          type="datetime-local"
+          class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2.5"
+          formControlName="to"
+      /></label>
+    </div>
+    <div class="mt-4 flex justify-end gap-3">
+      <button
+        type="button"
+        class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700"
+        (click)="clearFilters()"
+      >
+        Limpiar</button
+      ><button
+        type="submit"
+        class="rounded-xl bg-cyan-700 px-4 py-2.5 text-sm font-semibold text-white"
+      >
+        Aplicar filtros
+      </button>
+    </div>
+  </form>
+  @if (loading()) {
+    <div class="rounded-2xl bg-white p-12 text-center text-slate-500" role="status">Cargando eventos…</div>
+  } @else {
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Tabla del historial de eventos desplazable">
+        <table class="w-full min-w-4xl text-left text-sm">
+          <thead class="bg-slate-50 text-slate-600">
+            <tr>
+              <th class="px-5 py-3 font-medium">Fecha</th>
+              <th class="px-5 py-3 font-medium">Riesgo</th>
+              <th class="px-5 py-3 font-medium">Sensor</th>
+              <th class="px-5 py-3 font-medium">Comunidad</th>
+              <th class="px-5 py-3 font-medium">Estado</th>
+              <th class="px-5 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @for (event of events(); track event.id) {
+              <tr>
+                <td class="px-5 py-4 text-slate-600">
+                  {{ event.occurredAt | date: 'dd/MM/yyyy HH:mm:ss' }}
+                </td>
+                <td class="px-5 py-4">
+                  <span class="font-semibold">{{ riskLabels[event.riskType] }}</span>
+                  <p class="text-xs text-slate-500">{{ levelLabels[event.alertLevel] }}</p>
+                </td>
+                <td class="px-5 py-4">{{ sensorName(event.sensorId) }}</td>
+                <td class="px-5 py-4">{{ communityName(event.communityId) }}</td>
+                <td class="px-5 py-4">
+                  <span
+                    class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                    [class.bg-emerald-100]="event.resolvedAt"
+                    [class.text-emerald-800]="event.resolvedAt"
+                    [class.bg-red-100]="!event.resolvedAt"
+                    [class.text-red-800]="!event.resolvedAt"
+                    >{{ event.resolvedAt ? 'Resuelto' : 'Activo' }}</span
+                  >
+                </td>
+                <td class="px-5 py-4 text-right">
+                  <a
+                    [routerLink]="['/events', event.id]"
+                    class="font-semibold text-cyan-800 hover:underline"
+                    >Ver detalle</a
+                  >
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="px-5 py-12 text-center text-slate-500">
+                  No existen eventos para el rango y filtros seleccionados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

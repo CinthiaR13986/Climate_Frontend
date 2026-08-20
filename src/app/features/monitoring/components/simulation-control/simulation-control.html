@@ -1,0 +1,19 @@
+<section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div><h2 class="text-lg font-semibold text-slate-950">Simulación climática</h2><p class="mt-1 text-sm text-slate-500">Controla la generación automática de lecturas.</p></div>
+    <span class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold" [class.bg-emerald-100]="status()?.isRunning" [class.text-emerald-800]="status()?.isRunning" [class.bg-slate-200]="!status()?.isRunning" [class.text-slate-700]="!status()?.isRunning"><span class="size-2 rounded-full" [class.bg-emerald-600]="status()?.isRunning" [class.bg-slate-500]="!status()?.isRunning"></span>{{ status()?.isRunning ? 'Simulación activa' : 'Simulación detenida' }}</span>
+  </div>
+  @if (canOperate()) {
+    <div class="mt-5 flex flex-wrap gap-3">
+      <button type="button" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50" [disabled]="operating() || status()?.isRunning" (click)="startRequested.emit()">Iniciar</button>
+      <button type="button" class="rounded-xl bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-50" [disabled]="operating() || !status()?.isRunning" (click)="stopRequested.emit()">Detener</button>
+      @if (canReset()) { <button type="button" class="rounded-xl border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50" [disabled]="operating()" (click)="confirmReset.set(true)">Reiniciar</button> }
+    </div>
+  } @else { <p class="mt-5 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">Tu rol permite consultar el estado, pero no operar la simulación.</p> }
+</section>
+
+@if (confirmReset()) {
+  <div class="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4" role="dialog" aria-modal="true" aria-labelledby="reset-title">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"><h2 id="reset-title" class="text-xl font-semibold text-slate-950">¿Reiniciar la simulación?</h2><p class="mt-3 text-sm leading-6 text-slate-600">Esta acción restablecerá el estado de la simulación climática.</p><div class="mt-6 flex justify-end gap-3"><button type="button" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100" (click)="confirmReset.set(false)">Cancelar</button><button type="button" class="rounded-xl bg-red-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-800" (click)="acceptReset()">Reiniciar</button></div></div>
+  </div>
+}

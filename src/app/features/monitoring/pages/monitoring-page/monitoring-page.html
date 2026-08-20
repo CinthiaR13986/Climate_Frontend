@@ -1,0 +1,33 @@
+<div class="space-y-6">
+  <header><div class="flex flex-wrap items-center gap-3"><p class="text-sm font-semibold uppercase tracking-[0.16em] text-cyan-700">Datos dinámicos</p><span class="rounded-full px-2.5 py-1 text-xs font-semibold" [class.bg-emerald-100]="store.realtimeState() === 'connected'" [class.text-emerald-800]="store.realtimeState() === 'connected'" [class.bg-amber-100]="store.realtimeState() !== 'connected'" [class.text-amber-800]="store.realtimeState() !== 'connected'">{{ store.realtimeState() === 'connected' ? 'SignalR conectado' : 'Fallback REST activo' }}</span></div><h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Monitoreo en tiempo real</h1><p class="mt-2 text-slate-600">Eventos instantáneos por SignalR con respaldo REST cada cinco segundos ante desconexión.</p></header>
+
+  @if (store.error()) { <section class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">{{ store.error() }}</section> }
+
+  <app-simulation-control [status]="store.simulation()" [canOperate]="authStore.canOperate()" [canReset]="authStore.isAdministrator()" [operating]="store.operating()" (startRequested)="store.startSimulation()" (stopRequested)="store.stopSimulation()" (resetRequested)="store.resetSimulation()" />
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div><h2 class="text-lg font-semibold text-slate-950">Sensor seleccionado</h2><p class="mt-1 text-sm text-slate-500">Consulta su última lectura, histórico y evolución.</p></div>
+      <label class="block text-sm font-medium text-slate-700">Sensor
+        <select class="mt-2 w-full min-w-64 rounded-xl border border-slate-300 bg-white px-3 py-2.5" [value]="store.selectedSensorId() ?? ''" (change)="selectSensor($event)">
+          @for (sensor of store.sensors(); track sensor.id) { <option [value]="sensor.id">{{ sensor.name ?? sensor.code }} · {{ sensorLabels[sensor.type] }}</option> }
+        </select>
+      </label>
+    </div>
+    @if (store.latest(); as reading) {
+      <div class="mt-6 grid gap-4 rounded-xl bg-slate-950 p-5 text-white sm:grid-cols-3"><div><p class="text-sm text-slate-400">Último valor</p><p class="mt-1 text-3xl font-semibold">{{ reading.value | number:'1.0-2' }} <span class="text-base text-slate-300">{{ reading.unit }}</span></p></div><div><p class="text-sm text-slate-400">Variable</p><p class="mt-2 font-semibold">{{ sensorLabels[reading.sensorType] }}</p></div><div><p class="text-sm text-slate-400">Registrado</p><p class="mt-2 font-semibold">{{ reading.recordedAt | date:'dd/MM/yyyy HH:mm:ss' }}</p></div></div>
+    } @else if (!store.detailsLoading()) { <div class="mt-6 rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">Este sensor todavía no tiene lecturas.</div> }
+  </section>
+
+  <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end"><div><h2 class="text-lg font-semibold text-slate-950">Evolución del sensor</h2><p class="mt-1 text-sm text-slate-500">Agrupación proporcionada por el backend.</p></div>
+      <form class="grid gap-3 sm:grid-cols-4" [formGroup]="filters" (ngSubmit)="applyFilters()"><label class="text-sm text-slate-600">Desde<input type="datetime-local" formControlName="from" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2"></label><label class="text-sm text-slate-600">Hasta<input type="datetime-local" formControlName="to" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2"></label><label class="text-sm text-slate-600">Intervalo<select formControlName="interval" class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2"><option value="5m">5 minutos</option><option value="15m">15 minutos</option><option value="1h">1 hora</option><option value="1d">1 día</option></select></label><button type="submit" class="self-end rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" [disabled]="store.detailsLoading()">Aplicar</button></form>
+    </div>
+    <div class="mt-6"><app-sensor-chart [data]="store.chart()" /></div>
+  </section>
+
+  <section class="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div class="border-b border-slate-200 p-5"><h2 class="text-lg font-semibold text-slate-950">Histórico de lecturas</h2><p class="mt-1 text-sm text-slate-500">{{ store.history().length }} registros en el rango seleccionado</p></div><div class="overflow-x-auto"><table class="w-full min-w-2xl text-left text-sm"><thead class="bg-slate-50 text-slate-600"><tr><th class="px-5 py-3 font-medium">Fecha</th><th class="px-5 py-3 font-medium">Variable</th><th class="px-5 py-3 font-medium">Valor</th></tr></thead><tbody class="divide-y divide-slate-100">@for (reading of store.history(); track reading.id) { <tr><td class="px-5 py-3 text-slate-600">{{ reading.recordedAt | date:'dd/MM/yyyy HH:mm:ss' }}</td><td class="px-5 py-3 text-slate-800">{{ sensorLabels[reading.sensorType] }}</td><td class="px-5 py-3 font-semibold text-slate-950">{{ reading.value | number:'1.0-2' }} {{ reading.unit }}</td></tr> } @empty { <tr><td colspan="3" class="px-5 py-10 text-center text-slate-500">No existen lecturas para este rango.</td></tr> }</tbody></table></div></div>
+    <aside class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h2 class="text-lg font-semibold text-slate-950">Alertas recientes</h2><div class="mt-4 space-y-3">@for (alert of store.alerts().slice(0, 5); track alert.id) { <article class="rounded-xl border border-slate-200 p-4"><p class="text-xs font-bold uppercase tracking-wider text-red-700">{{ levelLabels[alert.level] }}</p><p class="mt-1 font-semibold text-slate-900">{{ alert.title ?? riskLabels[alert.alertType] }}</p><p class="mt-1 text-xs text-slate-500">{{ alert.generatedAt | date:'dd/MM HH:mm' }}</p></article> } @empty { <p class="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">No hay alertas activas.</p> }</div></aside>
+  </section>
+</div>
