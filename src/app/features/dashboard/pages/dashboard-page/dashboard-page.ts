@@ -1,3 +1,5 @@
+import { SensorChart } from '../../../monitoring/components/sensor-chart/sensor-chart';
+import { SENSOR_TYPE_LABELS } from '../../../monitoring/models/monitoring.models';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -7,12 +9,13 @@ import { DashboardStore } from '../../store/dashboard.store';
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [DatePipe, RouterLink, ClimateMetricCard, ActiveAlertsPanel],
+  imports: [DatePipe, RouterLink, SensorChart, ClimateMetricCard, ActiveAlertsPanel],
   providers: [DashboardStore],
   templateUrl: './dashboard-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardPage implements OnInit {
+  protected readonly labels = SENSOR_TYPE_LABELS;
   protected readonly store = inject(DashboardStore);
   ngOnInit(): void { this.store.load(); }
 }

@@ -9,8 +9,8 @@ export class SensorsApiService {
   private readonly http = inject(HttpClient);
   private readonly config = inject(APP_CONFIG);
 
-  getAll(): Observable<SensorResponse[]> {
-    return this.http.get<SensorResponse[]>(`${this.config.apiUrl}/api/sensors`);
+  getAll(filters: { search?: string; communityId?: string; type?: string; isActive?: boolean; code?: string } = {}): Observable<SensorResponse[]> {
+    return this.http.get<SensorResponse[]>(`${this.config.apiUrl}/api/sensors`, { params: Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== undefined && value !== "").map(([key, value]) => [key, String(value)])) });
   }
 
   getById(id: string): Observable<SensorResponse> {

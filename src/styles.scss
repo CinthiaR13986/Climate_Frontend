@@ -25,3 +25,10 @@ button, input, select, textarea { font: inherit; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+[role="dialog"] > div { max-width: 100%; min-width: 0; overflow-wrap: anywhere; }
+button { min-height: 2.5rem; }
+button:disabled { cursor: not-allowed; }
+label { min-width: 0; }
+input, select, textarea { max-width: 100%; }
+[aria-invalid="true"] { border-color: #b91c1c; }

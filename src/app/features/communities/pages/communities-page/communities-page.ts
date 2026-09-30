@@ -14,6 +14,10 @@ export class CommunitiesPage implements OnInit {
   protected readonly authStore = inject(AuthStore);
   protected readonly communities = signal<readonly CommunityResponse[]>([]);
   protected readonly query = signal('');
+  protected municipality = '';
+  protected department = '';
+  protected status = '';
+  protected applyFilters(): void { this.loading.set(true); this.error.set(null); this.load(); }
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly filtered = computed(() => {
@@ -21,6 +25,7 @@ export class CommunitiesPage implements OnInit {
     return term ? this.communities().filter(item => [item.name, item.description].some(value => value?.toLocaleLowerCase().includes(term))) : this.communities();
   });
 
-  ngOnInit(): void { this.api.getAll().pipe(finalize(() => this.loading.set(false))).subscribe({ next: communities => this.communities.set(communities), error: error => this.error.set(error instanceof ApiError ? error.message : 'No fue posible cargar las comunidades.') }); }
+  ngOnInit(): void { this.load(); }
+  private load(): void { this.api.getAll({ search: this.query(), municipality: this.municipality, department: this.department, isActive: this.status ? this.status === 'active' : undefined }).pipe(finalize(() => this.loading.set(false))).subscribe({ next: communities => this.communities.set(communities), error: error => this.error.set(error instanceof ApiError ? error.message : 'No fue posible cargar las comunidades.') }); }
   protected updateQuery(value: string): void { this.query.set(value); }
 }

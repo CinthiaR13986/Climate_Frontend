@@ -66,14 +66,14 @@ export const routes: Routes = [
         path: 'communities/new',
         loadComponent: () => import('./features/communities/pages/community-form-page/community-form-page').then(component => component.CommunityFormPage),
         canActivate: [roleGuard],
-        data: { pageTitle: 'Nueva comunidad', roles: ['Administrator', 'Operator'] },
+        data: { pageTitle: 'Nueva comunidad', roles: ['Administrator'] },
         title: 'Nueva comunidad | Climate Monitoring',
       },
       {
         path: 'communities/:id/edit',
         loadComponent: () => import('./features/communities/pages/community-form-page/community-form-page').then(component => component.CommunityFormPage),
         canActivate: [roleGuard],
-        data: { pageTitle: 'Editar comunidad', roles: ['Administrator', 'Operator'] },
+        data: { pageTitle: 'Editar comunidad', roles: ['Administrator'] },
         title: 'Editar comunidad | Climate Monitoring',
       },
       {
@@ -82,6 +82,10 @@ export const routes: Routes = [
         data: { pageTitle: 'Detalle de comunidad' },
         title: 'Detalle de comunidad | Climate Monitoring',
       },
+      { path: 'readings', loadComponent: () => import('./features/monitoring/pages/readings-page').then(m => m.ReadingsPage), data: { pageTitle: 'Lecturas históricas' } },
+      { path: 'alert-rules', loadComponent: () => import('./features/alert-rules/alert-rules-page').then(m => m.AlertRulesPage), data: { pageTitle: 'Reglas de alerta' } },
+      { path: 'alert-rules/new', canActivate: [roleGuard], data: { roles: ['Administrator'], pageTitle: 'Crear regla' }, loadComponent: () => import('./features/alert-rules/alert-rule-form-page').then(m => m.AlertRuleFormPage) },
+      { path: 'alert-rules/:id/edit', canActivate: [roleGuard], data: { roles: ['Administrator'], pageTitle: 'Editar regla' }, loadComponent: () => import('./features/alert-rules/alert-rule-form-page').then(m => m.AlertRuleFormPage) },
       {
         path: 'alerts',
         loadComponent: () => import('./features/alerts/pages/alerts-page/alerts-page').then(component => component.AlertsPage),
@@ -112,6 +116,12 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         data: { pageTitle: 'Usuarios', roles: ['Administrator'] },
         title: 'Usuarios | Climate Monitoring',
+      },
+      {
+        path: 'users/new',
+        loadComponent: () => import('./features/users/pages/user-create-page/user-create-page').then(component => component.UserCreatePage),
+        canActivate: [roleGuard], data: { pageTitle: 'Crear usuario', roles: ['Administrator'] },
+        title: 'Crear usuario | Climate Monitoring',
       },
       {
         path: 'users/:id/edit',

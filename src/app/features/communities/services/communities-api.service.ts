@@ -9,8 +9,8 @@ export class CommunitiesApiService {
   private readonly http = inject(HttpClient);
   private readonly config = inject(APP_CONFIG);
 
-  getAll(): Observable<CommunityResponse[]> {
-    return this.http.get<CommunityResponse[]>(`${this.config.apiUrl}/api/communities`);
+  getAll(filters: { search?: string; isActive?: boolean; municipality?: string; department?: string } = {}): Observable<CommunityResponse[]> {
+    return this.http.get<CommunityResponse[]>(`${this.config.apiUrl}/api/communities`, { params: Object.fromEntries(Object.entries(filters).filter(([, value]) => value !== undefined && value !== "").map(([key, value]) => [key, String(value)])) });
   }
 
   getById(id: string): Observable<CommunityResponse> {

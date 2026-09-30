@@ -9,6 +9,14 @@ export class MonitoringApiService {
   private readonly http = inject(HttpClient);
   private readonly config = inject(APP_CONFIG);
 
+  getReadings(filters: ReadingHistoryFilters & { sensorId?: string; page?: number } = {}) {
+    let params = new HttpParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value !== undefined && value !== '') params = params.set(key, value); });
+    return this.http.get<{ items: SensorReadingResponse[]; total: number; page: number; pageSize: number }>(`${this.config.apiUrl}/api/monitoring/readings`, { params });
+  }
+  getSimulatedValue(id: string) { return this.http.get<{ value: number | null }>(`${this.config.apiUrl}/api/monitoring/simulation/values/${id}`); }
+  setSimulatedValue(id: string, value: number) { return this.http.put(`${this.config.apiUrl}/api/monitoring/simulation/values/${id}`, { value }); }
+  clearSimulatedValue(id: string) { return this.http.delete(`${this.config.apiUrl}/api/monitoring/simulation/values/${id}`); }
   getCurrent(): Observable<SensorReadingResponse[]> {
     return this.http.get<SensorReadingResponse[]>(`${this.config.apiUrl}/api/monitoring/current`);
   }

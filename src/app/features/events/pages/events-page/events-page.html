@@ -99,7 +99,7 @@
               <th class="px-5 py-3 font-medium">Sensor</th>
               <th class="px-5 py-3 font-medium">Comunidad</th>
               <th class="px-5 py-3 font-medium">Estado</th>
-              <th class="px-5 py-3"></th>
+              <th class="px-5 py-3">Valor</th><th class="px-5 py-3">Responsable</th><th class="px-5 py-3">Descripción</th><th class="px-5 py-3"></th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -121,10 +121,10 @@
                     [class.text-emerald-800]="event.resolvedAt"
                     [class.bg-red-100]="!event.resolvedAt"
                     [class.text-red-800]="!event.resolvedAt"
-                    >{{ event.resolvedAt ? 'Resuelto' : 'Activo' }}</span
+                    >{{ event.status === 'Attended' ? 'Atendido' : event.status === 'Closed' || event.resolvedAt ? 'Cerrado' : 'Activo' }}</span
                   >
                 </td>
-                <td class="px-5 py-4 text-right">
+                <td class="px-5 py-4">{{ event.value ?? "Sin registro" }}</td><td class="px-5 py-4">{{ event.responsibleUserId || "Automático" }}</td><td class="px-5 py-4">{{ event.description }}</td><td class="px-5 py-4 text-right">
                   <a
                     [routerLink]="['/events', event.id]"
                     class="font-semibold text-cyan-800 hover:underline"
@@ -134,7 +134,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" class="px-5 py-12 text-center text-slate-500">
+                <td colspan="9" class="px-5 py-12 text-center text-slate-500">
                   No existen eventos para el rango y filtros seleccionados.
                 </td>
               </tr>
@@ -145,3 +145,5 @@
     </section>
   }
 </div>
+
+@if (statistics(); as stats) { <section class="mt-6 space-y-4 rounded-2xl border bg-white p-5"><h2 class="text-xl font-semibold">Estadísticas · {{ stats.total }} eventos</h2><p class="text-sm text-slate-600">Resumen de la comunidad y el período seleccionados.</p><div class="grid gap-4 sm:grid-cols-3">@for (group of [{ name: 'Fenómeno', values: stats.byRiskType }, { name: 'Nivel', values: stats.byAlertLevel }, { name: 'Estado', values: stats.byStatus }]; track group.name) { <div><h3 class="font-semibold">{{ group.name }}</h3>@for (entry of entries(group.values); track entry[0]) { <p>{{ entry[0] }}: {{ entry[1] }}</p> } @empty { <p>Sin datos</p> }</div> }</div></section> }

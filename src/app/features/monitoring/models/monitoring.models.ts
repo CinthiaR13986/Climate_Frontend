@@ -1,6 +1,7 @@
-export type SensorType = 'Temperature' | 'Humidity' | 'WindSpeed' | 'Rainfall' | 'WaterLevel';
+export type SensorType = 'Temperature' | 'Humidity' | 'WindSpeed' | 'Rainfall' | 'WaterLevel' | 'RiverLevel' | 'ReservoirLevel' | 'Smoke' | 'Other';
 
 export interface SensorReadingResponse {
+  readonly sensorWasActive?: boolean | null;
   readonly id: string;
   readonly sensorId: string;
   readonly communityId: string;
@@ -38,9 +39,9 @@ export interface CreateReadingRequest {
   readonly recordedAt?: string | null;
 }
 
-export const SENSOR_TYPES: readonly SensorType[] = ['Temperature', 'Humidity', 'WindSpeed', 'Rainfall', 'WaterLevel'];
+export const SENSOR_TYPES: readonly SensorType[] = ['Temperature', 'Humidity', 'WindSpeed', 'Rainfall', 'WaterLevel', 'RiverLevel', 'ReservoirLevel', 'Smoke', 'Other'];
 
 export const SENSOR_TYPE_LABELS: Readonly<Record<SensorType, string>> = {
   Temperature: 'Temperatura', Humidity: 'Humedad', WindSpeed: 'Velocidad del viento',
-  Rainfall: 'Nivel de lluvia', WaterLevel: 'Nivel del río',
+  Rainfall: 'Nivel de lluvia', WaterLevel: 'Nivel de agua (legado)', RiverLevel: 'Nivel de río', ReservoirLevel: 'Nivel de reservorio', Smoke: 'Humo', Other: 'Otro sensor ambiental',
 };

@@ -1,22 +1,30 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { buffer, debounceTime, filter, finalize, forkJoin } from 'rxjs';
+import { buffer, debounceTime, filter, finalize, interval, Subscription } from 'rxjs';
 import { ApiError } from '../../../core/http/api-error.model';
 import { RealtimeService } from '../../../core/realtime/realtime.service';
 import { AlertResponse } from '../../alerts/models/alert.models';
-import { AlertsApiService } from '../../alerts/services/alerts-api.service';
+import { DashboardApiService, DashboardSummary } from '../dashboard-api.service';
 import { SENSOR_TYPES, SensorReadingResponse, SensorType, SimulationStatusResponse } from '../../monitoring/models/monitoring.models';
-import { MonitoringApiService } from '../../monitoring/services/monitoring-api.service';
 import { SensorResponse } from '../../sensors/models/sensor.models';
-import { SensorsApiService } from '../../sensors/services/sensors-api.service';
 
 export interface ClimateMetric { readonly type: SensorType; readonly reading: SensorReadingResponse | null; }
 
 @Injectable()
 export class DashboardStore {
-  private readonly monitoringApi = inject(MonitoringApiService);
-  private readonly sensorsApi = inject(SensorsApiService);
-  private readonly alertsApi = inject(AlertsApiService);
+  private readonly api = inject(DashboardApiService);
+  private request?: Subscription;
+  readonly communityId = signal('');
+  readonly summary = signal<DashboardSummary | null>(null);
+  readonly communities = computed(() => this.summary()?.communities ?? []);
+  readonly communityCount = computed(() => this.summary()?.communityCount ?? 0);
+  readonly chartSeries = computed(() => {
+    const points = this.summary()?.evolution ?? [];
+    const keys = [...new Set(points.map(p => `${p.sensorType}|${p.unit}`))];
+    return keys.map(key => { const rows = points.filter(p => `${p.sensorType}|${p.unit}` === key); return { type: rows[0].sensorType, sensorId: key, unit: rows[0].unit, data: rows.map(p => ({ timestamp: p.timestamp, value: p.value })) }; });
+  });
+  readonly byLevel = computed(() => Object.entries(this.summary()?.byAlertLevel ?? {}));
+  selectCommunity(id: string): void { this.communityId.set(id); this.request?.unsubscribe(); this.loading.set(false); this.readingsState.set([]); this.alertsState.set([]); this.sensorsState.set([]); this.load(); }
   private readonly realtime = inject(RealtimeService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly readingsState = signal<readonly SensorReadingResponse[]>([]);
@@ -41,17 +49,11 @@ export class DashboardStore {
     if (this.loading()) return;
     this.loading.set(true);
     this.error.set(null);
-    forkJoin({
-      readings: this.monitoringApi.getCurrent(),
-      simulation: this.monitoringApi.getSimulationStatus(),
-      alerts: this.alertsApi.getAll({ isActive: true }),
-      sensors: this.sensorsApi.getAll(),
-    }).pipe(finalize(() => this.loading.set(false))).subscribe({
+    const communityId = this.communityId();
+    this.request = this.api.getSummary(communityId || undefined).pipe(finalize(() => this.loading.set(false)), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: result => {
-        this.readingsState.set(result.readings);
-        this.simulationState.set(result.simulation);
-        this.alertsState.set(result.alerts);
-        this.sensorsState.set(result.sensors);
+        this.summary.set(result); this.readingsState.set(result.readings);
+        this.simulationState.set(result.simulation); this.alertsState.set(result.alerts); this.sensorsState.set(result.sensors);
       },
       error: (error: unknown) => this.error.set(error instanceof ApiError ? error.message : 'No fue posible cargar el dashboard.'),
     });
@@ -61,6 +63,7 @@ export class DashboardStore {
   private bindRealtime(): void {
     if (this.realtimeBound) return;
     this.realtimeBound = true;
+    interval(30000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.load());
 
     const readingUpdates = this.realtime.readingUpdated$;
     readingUpdates.pipe(
@@ -69,10 +72,10 @@ export class DashboardStore {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(readings => this.readingsState.update(items => {
       const readingsBySensor = new Map(items.map(reading => [reading.sensorId, reading]));
-      readings.forEach(reading => readingsBySensor.set(reading.sensorId, reading));
+      readings.filter(r => !this.communityId() || r.communityId === this.communityId()).forEach(reading => readingsBySensor.set(reading.sensorId, reading));
       return [...readingsBySensor.values()];
     }));
-    this.realtime.alertGenerated$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(alert => this.alertsState.update(items => [alert, ...items.filter(item => item.id !== alert.id)]));
+    this.realtime.alertGenerated$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(alert => { this.alertsState.update(items => { const rest = items.filter(item => item.id !== alert.id); return alert.isActive && (!this.communityId() || alert.communityId === this.communityId()) ? [alert, ...rest] : rest; }); this.load(); });
     this.realtime.sensorStatusChanged$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(status => this.sensorsState.update(items => items.map(sensor => sensor.id === status.id ? { ...sensor, isActive: status.isActive } : sensor)));
     this.realtime.systemReset$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(status => { this.simulationState.set(status); this.readingsState.set([]); });
   }

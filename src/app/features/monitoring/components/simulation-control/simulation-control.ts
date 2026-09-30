@@ -1,7 +1,8 @@
+import { ModalDirective } from '../../../../shared/directives/modal.directive';
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { SimulationStatusResponse } from '../../models/monitoring.models';
 
-@Component({ selector: 'app-simulation-control', templateUrl: './simulation-control.html', changeDetection: ChangeDetectionStrategy.OnPush })
+@Component({ imports: [ModalDirective], selector: 'app-simulation-control', templateUrl: './simulation-control.html', changeDetection: ChangeDetectionStrategy.OnPush })
 export class SimulationControl {
   readonly status = input<SimulationStatusResponse | null>(null);
   readonly canOperate = input(false);

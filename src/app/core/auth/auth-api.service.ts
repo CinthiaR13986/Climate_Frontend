@@ -13,6 +13,8 @@ export class AuthApiService {
     return this.http.post<LoginResponse>(`${this.config.apiUrl}/api/auth/login`, request);
   }
 
+  logout(): Observable<void> { return this.http.post<void>(`${this.config.apiUrl}/api/auth/logout`, null); }
+
   register(request: RegisterRequest): Observable<UserResponse> {
     return this.http.post<UserResponse>(`${this.config.apiUrl}/api/auth/register`, request);
   }

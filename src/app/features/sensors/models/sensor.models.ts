@@ -11,6 +11,9 @@ export interface SensorResponse {
   readonly communityName: string | null;
   readonly latitude: number;
   readonly longitude: number;
+  readonly installationDate?: string | null;
+  readonly location?: string | null;
+  readonly environmentalType?: string | null;
   readonly isActive: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -25,4 +28,7 @@ export interface SensorRequest {
   readonly communityId: string;
   readonly latitude: number;
   readonly longitude: number;
+  readonly installationDate?: string | null;
+  readonly location?: string | null;
+  readonly environmentalType?: string | null;
 }

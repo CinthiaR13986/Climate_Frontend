@@ -9,7 +9,7 @@ import { CommunityResponse } from '../../../communities/models/community.models'
 import { CommunitiesApiService } from '../../../communities/services/communities-api.service';
 import { SensorResponse } from '../../../sensors/models/sensor.models';
 import { SensorsApiService } from '../../../sensors/services/sensors-api.service';
-import { EventFilters, EventResponse } from '../../models/event.models';
+import { EventFilters, EventResponse, EventStatistics } from '../../models/event.models';
 import { EventsApiService } from '../../services/events-api.service';
 
 @Component({ selector: 'app-events-page', imports: [DatePipe, ReactiveFormsModule, RouterLink], templateUrl: './events-page.html', changeDetection: ChangeDetectionStrategy.OnPush })
@@ -17,6 +17,8 @@ export class EventsPage implements OnInit {
   private readonly api = inject(EventsApiService);
   private readonly sensorsApi = inject(SensorsApiService);
   private readonly communitiesApi = inject(CommunitiesApiService);
+  protected readonly statistics = signal<EventStatistics | null>(null);
+  protected readonly entries = Object.entries;
   protected readonly events = signal<readonly EventResponse[]>([]);
   protected readonly sensors = signal<readonly SensorResponse[]>([]);
   protected readonly communities = signal<readonly CommunityResponse[]>([]);
@@ -33,7 +35,7 @@ export class EventsPage implements OnInit {
   protected clearFilters(): void { this.filters.reset({ riskType: '', alertLevel: '', sensorId: '', communityId: '', from: '', to: '' }); this.load(); }
   protected sensorName(id: string): string { const item = this.sensors().find(sensor => sensor.id === id); return item?.name ?? item?.code ?? 'Sensor no identificado'; }
   protected communityName(id: string): string { return this.communities().find(item => item.id === id)?.name ?? 'Comunidad no identificada'; }
-  private load(): void { this.loading.set(true); const value = this.filters.getRawValue(); const filters: EventFilters = { riskType: value.riskType || undefined, alertLevel: value.alertLevel || undefined, sensorId: value.sensorId || undefined, communityId: value.communityId || undefined, from: this.toIso(value.from), to: this.toIso(value.to) }; this.api.getAll(filters).pipe(finalize(() => this.loading.set(false))).subscribe({ next: events => { this.events.set(events); this.error.set(null); }, error: error => this.setError(error) }); }
+  private load(): void { this.loading.set(true); const value = this.filters.getRawValue(); const filters: EventFilters = { riskType: value.riskType || undefined, alertLevel: value.alertLevel || undefined, sensorId: value.sensorId || undefined, communityId: value.communityId || undefined, from: this.toIso(value.from), to: this.toIso(value.to) }; forkJoin({ events: this.api.getAll(filters), statistics: this.api.statistics({ communityId: filters.communityId, from: filters.from, to: filters.to }) }).pipe(finalize(() => this.loading.set(false))).subscribe({ next: result => { this.events.set(result.events); this.statistics.set(result.statistics); this.error.set(null); }, error: error => this.setError(error) }); }
   private toIso(value: string): string | undefined { return value ? new Date(value).toISOString() : undefined; }
   private setError(error: unknown): void { this.error.set(error instanceof ApiError ? error.message : 'No fue posible cargar el historial de eventos.'); }
 }

@@ -2,10 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { Subject, of } from 'rxjs';
 import { RealtimeService } from '../../../core/realtime/realtime.service';
 import { AlertResponse } from '../../alerts/models/alert.models';
-import { AlertsApiService } from '../../alerts/services/alerts-api.service';
+import { DashboardApiService, DashboardSummary } from '../dashboard-api.service';
 import { SensorReadingResponse, SimulationStatusResponse } from '../../monitoring/models/monitoring.models';
-import { MonitoringApiService } from '../../monitoring/services/monitoring-api.service';
-import { SensorsApiService } from '../../sensors/services/sensors-api.service';
 import { DashboardStore } from './dashboard.store';
 
 describe('DashboardStore', () => {
@@ -15,15 +13,7 @@ describe('DashboardStore', () => {
     TestBed.configureTestingModule({
       providers: [
         DashboardStore,
-        {
-          provide: MonitoringApiService,
-          useValue: {
-            getCurrent: () => of([]),
-            getSimulationStatus: () => of({ isRunning: true } satisfies SimulationStatusResponse),
-          },
-        },
-        { provide: SensorsApiService, useValue: { getAll: () => of([]) } },
-        { provide: AlertsApiService, useValue: { getAll: () => of([]) } },
+        { provide: DashboardApiService, useValue: { getSummary: () => of(emptySummary()) } },
         {
           provide: RealtimeService,
           useValue: {
@@ -51,6 +41,17 @@ describe('DashboardStore', () => {
     vi.useRealTimers();
   });
 
+  it('keeps realtime readings inside the selected community', async () => {
+    vi.useFakeTimers();
+    const store = TestBed.inject(DashboardStore);
+    store.selectCommunity('community-1');
+    readingUpdated.next(createReading('inside', 20));
+    readingUpdated.next({ ...createReading('outside', 99), communityId: 'community-2' });
+    await vi.advanceTimersByTimeAsync(500);
+    expect(store.readings().map(x => x.sensorId)).toEqual(['inside']);
+    vi.useRealTimers();
+  });
+
   it('binds realtime only once when the dashboard reloads', () => {
     const store = TestBed.inject(DashboardStore);
     store.load();
@@ -73,3 +74,5 @@ function createReading(sensorId: string, value: number): SensorReadingResponse {
     recordedAt: '2026-08-20T00:00:00Z',
   };
 }
+
+function emptySummary(): DashboardSummary { return { communityCount: 0, activeSensorCount: 0, inactiveSensorCount: 0, activeAlertCount: 0, byAlertLevel: {}, communities: [], sensors: [], alerts: [], readings: [], simulation: { isRunning: true }, events: { total: 0, byRiskType: {}, byAlertLevel: {}, byStatus: {} }, evolution: [] }; }

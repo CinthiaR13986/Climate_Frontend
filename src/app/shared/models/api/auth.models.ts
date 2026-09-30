@@ -13,6 +13,7 @@ export interface UserResponse {
   readonly isActive: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly lastLoginAt?: string | null;
 }
 
 export interface LoginResponse {

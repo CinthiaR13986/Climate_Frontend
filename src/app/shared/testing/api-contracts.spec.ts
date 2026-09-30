@@ -18,6 +18,36 @@ describe('API service contracts', () => {
   });
   afterEach(() => http.verify());
 
+  it('sends sensor filters to Gateway including false status', () => {
+    TestBed.inject(SensorsApiService).getAll({ communityId: 'c1', type: 'Smoke', isActive: false, code: 'SM', search: 'station' }).subscribe();
+    const request = http.expectOne(req => req.url === 'http://gateway.test/api/sensors');
+    expect(request.request.params.get('communityId')).toBe('c1');
+    expect(request.request.params.get('type')).toBe('Smoke');
+    expect(request.request.params.get('isActive')).toBe('false');
+    expect(request.request.params.get('code')).toBe('SM');
+    expect(request.request.params.get('search')).toBe('station');
+    request.flush([]);
+  });
+
+  it('sends community geography and status filters to Gateway', () => {
+    TestBed.inject(CommunitiesApiService).getAll({ municipality: 'Town', department: 'Region', isActive: true, search: 'North' }).subscribe();
+    const request = http.expectOne(req => req.url === 'http://gateway.test/api/communities');
+    expect(request.request.params.get('municipality')).toBe('Town');
+    expect(request.request.params.get('department')).toBe('Region');
+    expect(request.request.params.get('search')).toBe('North');
+    expect(request.request.params.get('isActive')).toBe('true');
+    request.flush([]);
+  });
+
+  it('sends user search and role filters without empty values', () => {
+    TestBed.inject(UsersApiService).getAll({ search: '', role: 'Operator', isActive: false }).subscribe();
+    const request = http.expectOne(req => req.url === 'http://gateway.test/api/users');
+    expect(request.request.params.get('role')).toBe('Operator');
+    expect(request.request.params.get('isActive')).toBe('false');
+    expect(request.request.params.has('search')).toBe(false);
+    request.flush([]);
+  });
+
   it('builds all supported alert filters', () => {
     TestBed.inject(AlertsApiService).getAll({ riskType: 'Flood', alertLevel: 'Red', sensorId: 's1', communityId: 'c1', isActive: false }).subscribe();
     const request = http.expectOne(req => req.url === 'http://gateway.test/api/alerts');
