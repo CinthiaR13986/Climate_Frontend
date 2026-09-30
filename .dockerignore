@@ -9,3 +9,11 @@ docs
 *.log
 Dockerfile*
 docker-compose*.yml
+
+.env*
+**/.env*
+**/*.pfx
+**/*.key
+**/secrets*.yaml
+**/secrets*.yml
+**/node_modules/

@@ -93,7 +93,7 @@ export class RealtimeService {
 
   private dispatch(target: string, payload: unknown): void {
     if (target === 'SensorReadingUpdated') this.readingSubject.next(payload as SensorReadingResponse);
-    if (target === 'AlertGenerated') this.alertSubject.next(payload as AlertResponse);
+    if (target === 'AlertGenerated' || target === 'AlertAttended' || target === 'AlertClosed') this.alertSubject.next(payload as AlertResponse);
     if (target === 'SensorStatusChanged') this.sensorStatusSubject.next(payload as SensorStatusChanged);
     if (target === 'SystemReset') this.systemResetSubject.next(payload as SimulationStatusResponse);
   }

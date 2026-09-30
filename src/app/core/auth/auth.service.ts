@@ -24,6 +24,7 @@ export class AuthService {
   }
 
   logout(redirect = true): void {
+    if (this.store.isAuthenticated()) this.api.logout().subscribe({ error: () => { /* Local session must still close when the server is unavailable. */ } });
     this.realtime.stop();
     this.store.clearSession();
     if (redirect) void this.router.navigate(['/login']);

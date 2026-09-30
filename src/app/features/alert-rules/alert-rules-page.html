@@ -1,0 +1,16 @@
+<div class="space-y-6">
+  <header class="flex flex-wrap items-center justify-between gap-4"><div><h1 class="text-3xl font-semibold">Reglas de alerta</h1><p class="mt-2 text-slate-600">Una lectura fuera del intervalo permitido activa la regla. Prevalece el nivel mayor por fenómeno.</p></div>@if (auth.isAdministrator()) { <a routerLink="/alert-rules/new" class="rounded-xl bg-cyan-700 px-4 py-3 font-semibold text-white">Crear regla</a> }</header>
+  @if (error()) { <p role="alert" class="rounded-xl bg-red-50 p-4 text-red-800">{{ error() }}</p><button (click)="load()" class="underline">Reintentar</button> }
+  @if (loading()) { <p role="status">Cargando reglas…</p><div aria-hidden="true" class="grid gap-4 md:grid-cols-2">@for (item of [1,2,3,4]; track item) { <div class="h-40 animate-pulse rounded-2xl bg-slate-200"></div> }</div> } @else {
+    <section class="grid gap-4 md:grid-cols-2">
+      @for (rule of rules(); track rule.id) {
+        <article class="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
+          <h2 class="text-xl font-semibold">{{ rule.name }}</h2><p>{{ sensorLabels[rule.sensorType] }} · {{ risks[rule.riskType] }} · {{ levels[rule.alertLevel] }}</p>
+          <p>Intervalo permitido: {{ rule.minimumValue ?? 'Sin mínimo' }} a {{ rule.maximumValue ?? 'Sin máximo' }}</p><p>{{ rule.message }}</p><p class="font-semibold">{{ rule.isActive ? 'Activa' : 'Inactiva' }}</p>
+          @if (auth.isAdministrator()) { <div class="flex gap-4"><a class="font-semibold text-cyan-800 underline" [routerLink]="['/alert-rules', rule.id, 'edit']">Editar</a><button class="font-semibold underline" (click)="selected.set(rule)">{{ rule.isActive ? 'Desactivar' : 'Activar' }}</button></div> }
+        </article>
+      } @empty { <p class="rounded-xl border border-dashed p-8">No hay reglas configuradas.</p> }
+    </section>
+  }
+  @if (selected(); as rule) { <section role="dialog" aria-modal="true" appModal [appModalBusy]="busy()" (modalDismiss)="selected.set(null)" aria-labelledby="rule-confirm" class="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4"><div class="space-y-4 rounded-2xl bg-white p-6"><h2 id="rule-confirm" class="text-xl font-semibold">{{ rule.isActive ? 'Desactivar' : 'Activar' }} {{ rule.name }}</h2>@if (error()) { <p role="alert" class="mt-3 text-sm text-red-800">{{ error() }}</p> }<p>El cambio se aplicará a las siguientes lecturas.</p><div class="flex gap-4"><button [disabled]="busy()" (click)="selected.set(null)">Cancelar</button><button class="rounded-lg bg-cyan-700 px-4 py-2 text-white" [disabled]="busy()" (click)="confirm()">Confirmar</button></div></div></section> }
+</div>

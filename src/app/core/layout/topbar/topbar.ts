@@ -1,4 +1,4 @@
-import { Component, DestroyRef, HostListener, inject, output, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -11,6 +11,7 @@ export class Topbar {
   protected readonly userMenuOpen = signal(false);
   protected readonly pageTitle = signal('Dashboard');
   readonly menuToggle = output<void>();
+  readonly navigationOpen = input(false);
 
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);

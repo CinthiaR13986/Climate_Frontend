@@ -1,3 +1,4 @@
+import { SimulatedValue } from '../../../monitoring/components/simulated-value';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -7,7 +8,7 @@ import { SENSOR_TYPE_LABELS } from '../../../monitoring/models/monitoring.models
 import { SensorResponse } from '../../models/sensor.models';
 import { SensorsApiService } from '../../services/sensors-api.service';
 
-@Component({ selector: 'app-sensor-detail-page', imports: [DatePipe, DecimalPipe, RouterLink], templateUrl: './sensor-detail-page.html', changeDetection: ChangeDetectionStrategy.OnPush })
+@Component({ selector: 'app-sensor-detail-page', imports: [DatePipe, DecimalPipe, RouterLink, SimulatedValue], templateUrl: './sensor-detail-page.html', changeDetection: ChangeDetectionStrategy.OnPush })
 export class SensorDetailPage implements OnInit {
   private readonly api = inject(SensorsApiService);
   private readonly route = inject(ActivatedRoute);

@@ -11,6 +11,9 @@ export class AlertsApiService {
 
   getAll(filters: AlertFilters = {}): Observable<AlertResponse[]> {
     let params = new HttpParams();
+    if (filters.from) params = params.set("from", filters.from);
+    if (filters.to) params = params.set("to", filters.to);
+    if (filters.status) params = params.set("status", filters.status);
     if (filters.riskType) params = params.set('riskType', filters.riskType);
     if (filters.alertLevel) params = params.set('alertLevel', filters.alertLevel);
     if (filters.sensorId) params = params.set('sensorId', filters.sensorId);
@@ -23,6 +26,9 @@ export class AlertsApiService {
     return this.http.get<AlertResponse>(`${this.config.apiUrl}/api/alerts/${id}`);
   }
 
+  transition(id: string, action: 'attend' | 'close'): Observable<void> {
+    return this.http.patch<void>(`${this.config.apiUrl}/api/alerts/${id}/${action}`, null);
+  }
   resolve(id: string): Observable<void> {
     return this.http.patch<void>(`${this.config.apiUrl}/api/alerts/${id}/resolve`, null);
   }

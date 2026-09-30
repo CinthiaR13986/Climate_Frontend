@@ -2,8 +2,9 @@
   <header>
     <p class="text-sm font-semibold uppercase tracking-[0.16em] text-cyan-700">Administración</p>
     <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Usuarios</h1>
+    <a routerLink="/users/new" class="mt-3 inline-block rounded-lg bg-cyan-700 px-4 py-2 text-white">Crear usuario</a>
     <p class="mt-2 text-slate-600">Gestiona identidad, rol y acceso de las cuentas registradas.</p>
-  </header>
+  </header><button type="button" (click)="applyFilters()" [disabled]="loading()" class="rounded-lg bg-cyan-700 px-4 py-2 text-white disabled:opacity-50">Aplicar filtros</button>
   @if (error()) {
     <div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
       {{ error() }}
@@ -62,6 +63,7 @@
                     >{{ user.username || 'Sin usuario' }}</a
                   >
                   <p class="text-xs text-slate-500">{{ user.email || 'Sin correo' }}</p>
+                  <p class="mt-1 text-xs text-slate-500">Último acceso: {{ user.lastLoginAt ? (user.lastLoginAt | date:'dd/MM/yyyy HH:mm') : 'Nunca' }}</p>
                 </td>
                 <td class="px-5 py-4">
                   {{
@@ -123,13 +125,13 @@
   <div
     class="fixed inset-0 z-50 grid place-items-center bg-slate-950/60 p-4"
     role="dialog"
-    aria-modal="true"
+    aria-modal="true" appModal [appModalBusy]="!!mutatingId()" (modalDismiss)="selectedUser.set(null)"
     aria-labelledby="status-title"
   >
     <div class="w-full max-w-md rounded-2xl bg-white p-6">
       <h2 id="status-title" class="text-xl font-semibold">
         ¿{{ user.isActive ? 'Desactivar' : 'Activar' }} a {{ user.username }}?
-      </h2>
+      </h2>@if (error()) { <p role="alert" class="mt-3 text-sm text-red-800">{{ error() }}</p> }
       <p class="mt-3 text-sm text-slate-600">
         {{
           user.isActive
@@ -141,13 +143,13 @@
         <button
           type="button"
           class="rounded-xl px-4 py-2.5 font-semibold"
-          (click)="selectedUser.set(null)"
+          [disabled]="!!mutatingId()" (click)="selectedUser.set(null)"
         >
           Cancelar</button
         ><button
           type="button"
           class="rounded-xl bg-slate-900 px-4 py-2.5 font-semibold text-white"
-          (click)="confirmStatus()"
+          [disabled]="!!mutatingId()" (click)="confirmStatus()"
         >
           Confirmar
         </button>

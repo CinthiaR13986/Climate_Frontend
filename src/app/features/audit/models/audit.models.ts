@@ -8,6 +8,7 @@ export interface AuditResponse {
   readonly description: string | null;
   readonly ipAddress: string | null;
   readonly timestamp: string;
+  readonly correlationId?: string | null;
 }
 
 export interface AuditFilters {

@@ -28,6 +28,9 @@ export class SensorFormPage implements OnInit {
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly form = new FormGroup({
+    installationDate: new FormControl('', { nonNullable: true }),
+    location: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(250)] }),
+    environmentalType: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
     code: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(50)] }),
     description: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
@@ -41,7 +44,7 @@ export class SensorFormPage implements OnInit {
   ngOnInit(): void {
     const sensorRequest = this.sensorId ? this.api.getById(this.sensorId) : of(null);
     forkJoin({ communities: this.communitiesApi.getAll(), sensor: sensorRequest }).pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: ({ communities, sensor }) => { this.communities.set(communities.filter(item => item.isActive || item.id === sensor?.communityId)); if (sensor) this.form.patchValue({ ...sensor, description: sensor.description ?? '', name: sensor.name ?? '', code: sensor.code ?? '', unit: sensor.unit ?? '' }); },
+      next: ({ communities, sensor }) => { this.communities.set(communities.filter(item => item.isActive || item.id === sensor?.communityId)); if (sensor) this.form.patchValue({ ...sensor, installationDate: sensor.installationDate ?? '', location: sensor.location ?? '', environmentalType: sensor.environmentalType ?? '', description: sensor.description ?? '', name: sensor.name ?? '', code: sensor.code ?? '', unit: sensor.unit ?? '' }); },
       error: error => this.setError(error),
     });
   }
@@ -50,7 +53,7 @@ export class SensorFormPage implements OnInit {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
     const value = this.form.getRawValue();
-    const request: SensorRequest = { ...value, description: value.description.trim() || null };
+    const request: SensorRequest = { ...value, installationDate: value.installationDate || null, location: value.location.trim() || null, environmentalType: value.environmentalType.trim() || null, description: value.description.trim() || null };
     const operation = this.sensorId ? this.api.update(this.sensorId, request) : this.api.create(request);
     operation.pipe(finalize(() => this.saving.set(false))).subscribe({ next: sensor => { this.form.markAsPristine(); this.toast.show(`Sensor ${this.isEdit ? 'actualizado' : 'creado'}.`, 'success'); void this.router.navigate(['/sensors', sensor.id]); }, error: error => this.setError(error) });
   }

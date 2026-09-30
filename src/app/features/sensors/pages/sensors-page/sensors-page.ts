@@ -1,3 +1,4 @@
+import { ModalDirective } from '../../../../shared/directives/modal.directive';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,12 +8,23 @@ import { AuthStore } from '../../../../core/auth/auth.store';
 import { ApiError } from '../../../../core/http/api-error.model';
 import { ToastService } from '../../../../core/notifications/toast.service';
 import { SENSOR_TYPE_LABELS } from '../../../monitoring/models/monitoring.models';
+import { CommunitiesApiService } from '../../../communities/services/communities-api.service';
+import { CommunityResponse } from '../../../communities/models/community.models';
+import { SensorType } from '../../../monitoring/models/monitoring.models';
 import { SensorResponse } from '../../models/sensor.models';
 import { SensorsApiService } from '../../services/sensors-api.service';
 
-@Component({ selector: 'app-sensors-page', imports: [DatePipe, FormsModule, RouterLink], templateUrl: './sensors-page.html', changeDetection: ChangeDetectionStrategy.OnPush })
+@Component({ selector: 'app-sensors-page', imports: [ModalDirective, DatePipe, FormsModule, RouterLink], templateUrl: './sensors-page.html', changeDetection: ChangeDetectionStrategy.OnPush })
 export class SensorsPage implements OnInit {
   private readonly api = inject(SensorsApiService);
+  private readonly communitiesApi = inject(CommunitiesApiService);
+  protected readonly communities = signal<readonly CommunityResponse[]>([]);
+  protected readonly types = Object.keys(SENSOR_TYPE_LABELS) as SensorType[];
+  protected communityId = '';
+  protected type = '';
+  protected status = '';
+  protected code = '';
+  protected applyFilters(): void { this.load(); }
   private readonly toast = inject(ToastService);
   protected readonly authStore = inject(AuthStore);
   protected readonly labels = SENSOR_TYPE_LABELS;
@@ -27,7 +39,7 @@ export class SensorsPage implements OnInit {
     return term ? this.sensors().filter(sensor => [sensor.name, sensor.code, sensor.communityName, this.labels[sensor.type]].some(value => value?.toLocaleLowerCase().includes(term))) : this.sensors();
   });
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void { this.load(); this.communitiesApi.getAll().subscribe({ next: values => this.communities.set(values), error: error => this.setError(error) }); }
   protected updateQuery(value: string): void { this.query.set(value); }
   protected changeStatus(sensor: SensorResponse): void {
     this.mutatingId.set(sensor.id);
@@ -42,7 +54,7 @@ export class SensorsPage implements OnInit {
   }
   private load(showLoading = true): void {
     if (showLoading) this.loading.set(true);
-    this.api.getAll().pipe(finalize(() => this.loading.set(false))).subscribe({ next: sensors => { this.sensors.set(sensors); this.error.set(null); }, error: error => this.setError(error) });
+    this.api.getAll({ search: this.query(), communityId: this.communityId, type: this.type, code: this.code, isActive: this.status ? this.status === 'active' : undefined }).pipe(finalize(() => this.loading.set(false))).subscribe({ next: sensors => { this.sensors.set(sensors); this.error.set(null); }, error: error => this.setError(error) });
   }
   private setError(error: unknown): void { this.error.set(error instanceof ApiError ? error.message : 'No fue posible procesar los sensores.'); }
 }

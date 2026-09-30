@@ -1,20 +1,21 @@
-FROM node:22-alpine AS build
-
+# syntax=docker/dockerfile:1
+ARG NODE_IMAGE=node:24.21.0-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
+FROM ${NODE_IMAGE} AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
-
-COPY angular.json tsconfig.json tsconfig.app.json tsconfig.spec.json eslint.config.js .postcssrc.json ./
+RUN --mount=type=cache,target=/root/.npm --mount=type=secret,id=npm_ca \
+    if [ -f /run/secrets/npm_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/npm_ca; fi; npm ci
+COPY angular.json tsconfig.json tsconfig.app.json .postcssrc.json ./
 COPY public ./public
 COPY src ./src
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:1.27-alpine AS runtime
-
-ENV BACKEND_HOST=host.docker.internal:8080
-COPY nginx.conf.template /etc/nginx/templates/default.conf.template
-COPY --from=build /app/dist/climate-monitoring-web/browser /usr/share/nginx/html
-
+FROM ${NODE_IMAGE} AS runtime
+ENV NODE_ENV=production PORT=8080
+WORKDIR /app
+COPY --from=build --chown=node:node /app/dist/climate-monitoring-web/browser ./browser
+COPY --chown=node:node server.mjs ./server.mjs
+USER node
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget -q -O /dev/null http://127.0.0.1:8080/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD node -e "fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", "server.mjs"]

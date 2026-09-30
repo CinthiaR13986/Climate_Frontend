@@ -19,6 +19,9 @@ export class CommunityFormPage implements OnInit {
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly form = new FormGroup({
+    municipality: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(120)] }),
+    department: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(120)] }),
+    country: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(120)] }),
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
     description: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     latitude: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(-90), Validators.max(90)] }),
@@ -28,14 +31,14 @@ export class CommunityFormPage implements OnInit {
 
   ngOnInit(): void {
     if (!this.communityId) return;
-    this.api.getById(this.communityId).pipe(finalize(() => this.loading.set(false))).subscribe({ next: community => this.form.patchValue({ ...community, name: community.name ?? '', description: community.description ?? '' }), error: error => this.setError(error) });
+    this.api.getById(this.communityId).pipe(finalize(() => this.loading.set(false))).subscribe({ next: community => this.form.patchValue({ ...community, municipality: community.municipality ?? '', department: community.department ?? '', country: community.country ?? '', name: community.name ?? '', description: community.description ?? '' }), error: error => this.setError(error) });
   }
 
   protected save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
     const value = this.form.getRawValue();
-    const base: CreateCommunityRequest = { name: value.name.trim(), description: value.description.trim() || null, latitude: value.latitude, longitude: value.longitude };
+    const base: CreateCommunityRequest = { municipality: value.municipality.trim() || null, department: value.department.trim() || null, country: value.country.trim() || null, name: value.name.trim(), description: value.description.trim() || null, latitude: value.latitude, longitude: value.longitude };
     const operation = this.communityId ? this.api.update(this.communityId, { ...base, isActive: value.isActive } satisfies UpdateCommunityRequest) : this.api.create(base);
     operation.pipe(finalize(() => this.saving.set(false))).subscribe({ next: community => { this.form.markAsPristine(); this.toast.show(`Comunidad ${this.isEdit ? 'actualizada' : 'creada'}.`, 'success'); void this.router.navigate(['/communities', community.id]); }, error: error => this.setError(error) });
   }

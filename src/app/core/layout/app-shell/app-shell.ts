@@ -1,3 +1,4 @@
+import { ModalDirective } from '../../../shared/directives/modal.directive';
 import { Component, effect, ElementRef, HostListener, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';
@@ -6,7 +7,7 @@ import { RealtimeService } from '../../realtime/realtime.service';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, Sidebar, Topbar],
+  imports: [ModalDirective, RouterOutlet, Sidebar, Topbar],
   templateUrl: './app-shell.html',
 })
 export class AppShell implements OnInit, OnDestroy {
