@@ -6,7 +6,6 @@ services:
       GATEWAY_PUBLIC_URL: https://${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}
     labels:
       - traefik.enable=true
-      - traefik.docker.network=climate-monitoring-frontend
       - traefik.http.routers.climate-web.rule=Host(`${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}`)
       - traefik.http.routers.climate-web.priority=10
       - traefik.http.routers.climate-web.entrypoints=websecure
