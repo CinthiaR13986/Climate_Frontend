@@ -4,7 +4,7 @@ services:
     image: climate/frontend:phase2
     restart: unless-stopped
     ports:
-      - "4200:8080"
+      - "4200:4200"
     environment:
       GATEWAY_PUBLIC_URL: "https://${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}"
       GATEWAY_INTERNAL_URL: http://host.docker.internal:18080
@@ -16,7 +16,7 @@ services:
       - traefik.http.routers.climate-web.entrypoints=websecure
       - traefik.http.routers.climate-web.tls=true
       - traefik.http.routers.climate-web.tls.certresolver=letsencrypt
-      - traefik.http.services.climate-web.loadbalancer.server.port=8080
+      - traefik.http.services.climate-web.loadbalancer.server.port=4200
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
