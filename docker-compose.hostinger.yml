@@ -4,10 +4,13 @@ services:
     ports: !reset []
     environment:
       GATEWAY_PUBLIC_URL: https://${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}
+      GATEWAY_INTERNAL_URL: http://gateway:8080
+    networks:
+      - default
+      - backend
     labels:
       - traefik.enable=true
       - traefik.http.routers.climate-web.rule=Host(`${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}`)
-      - traefik.http.routers.climate-web.priority=10
       - traefik.http.routers.climate-web.entrypoints=websecure
       - traefik.http.routers.climate-web.tls=true
       - traefik.http.routers.climate-web.tls.certresolver=letsencrypt
@@ -23,3 +26,6 @@ services:
 networks:
   default:
     name: climate-monitoring-frontend
+  backend:
+    external: true
+    name: climate-monitoring-backend
