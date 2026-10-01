@@ -9,11 +9,11 @@ services:
       GATEWAY_PUBLIC_URL: "http://179.236.231.32:18080"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.climate-web.rule=Host(`${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}`)
-      - traefik.http.routers.climate-web.entrypoints=websecure
-      - traefik.http.routers.climate-web.tls=true
-      - traefik.http.routers.climate-web.tls.certresolver=letsencrypt
-      - traefik.http.services.climate-web.loadbalancer.server.port=4200
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${COMPOSE_PROJECT_NAME}.${TRAEFIK_HOST}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls.certresolver=letsencrypt
+      - traefik.http.services.${COMPOSE_PROJECT_NAME}.loadbalancer.server.port=4200
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
