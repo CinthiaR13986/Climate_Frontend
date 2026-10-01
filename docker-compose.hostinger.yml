@@ -4,7 +4,7 @@ services:
     ports: !reset []
     environment:
       GATEWAY_PUBLIC_URL: https://${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}
-      GATEWAY_INTERNAL_URL: http://host.docker.internal:8080
+      GATEWAY_INTERNAL_URL: http://host.docker.internal:18080
     extra_hosts:
       - "host.docker.internal:host-gateway"
     labels:
