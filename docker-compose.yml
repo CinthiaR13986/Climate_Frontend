@@ -6,10 +6,7 @@ services:
     ports:
       - "4200:4200"
     environment:
-      GATEWAY_PUBLIC_URL: "https://${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}"
-      GATEWAY_INTERNAL_URL: http://host.docker.internal:18080
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      GATEWAY_PUBLIC_URL: "http://179.236.231.32:18080"
     labels:
       - traefik.enable=true
       - traefik.http.routers.climate-web.rule=Host(`${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}`)
