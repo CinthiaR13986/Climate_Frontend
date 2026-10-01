@@ -3,6 +3,8 @@ services:
     build: .
     image: climate/frontend:phase2
     restart: unless-stopped
+    ports:
+      - "4200:8080"
     environment:
       GATEWAY_PUBLIC_URL: "https://${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}"
       GATEWAY_INTERNAL_URL: http://host.docker.internal:18080
