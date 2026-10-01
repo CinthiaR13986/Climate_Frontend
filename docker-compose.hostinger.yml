@@ -4,10 +4,9 @@ services:
     ports: !reset []
     environment:
       GATEWAY_PUBLIC_URL: https://${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}
-      GATEWAY_INTERNAL_URL: http://gateway:8080
-    networks:
-      - default
-      - backend
+      GATEWAY_INTERNAL_URL: http://host.docker.internal:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     labels:
       - traefik.enable=true
       - traefik.http.routers.climate-web.rule=Host(`${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}`)
@@ -23,9 +22,3 @@ services:
       - traefik.http.middlewares.climate-https.redirectscheme.scheme=https
       - traefik.http.middlewares.climate-https.redirectscheme.permanent=true
 
-networks:
-  default:
-    name: climate-monitoring-frontend
-  backend:
-    external: true
-    name: climate-monitoring-backend
