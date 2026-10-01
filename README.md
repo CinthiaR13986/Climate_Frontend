@@ -333,3 +333,8 @@ móvil a 375 px y 14 estados con axe. Ver [resultados y límites](../../backend/
 
 Si el build Docker requiere una CA corporativa, pasa su certificado PEM con
 `--secret id=npm_ca,src=ruta/ca.pem`. Solo se usa durante `npm ci` y TLS sigue activo.
+
+## Hostinger con Traefik
+
+Consulta [la guía de despliegue](HOSTINGER.md) para usar el dominio con HTTPS.
+
