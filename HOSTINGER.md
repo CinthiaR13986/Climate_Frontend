@@ -1,7 +1,8 @@
 # Frontend en Hostinger
 
 Utiliza el proyecto Traefik de Hostinger con entrypoints `web` y `websecure`,
-resolver `letsencrypt` y red externa `traefik-proxy`. Apunta el dominio al VPS.
+resolver `letsencrypt` y `network_mode: host`. El complemento crea una red
+bridge para que Traefik alcance el frontend. Apunta el dominio al VPS.
 Si `agua` todavía usa ese dominio, cambia su dominio o detén esa aplicación.
 Despliega primero el backend con su complemento Hostinger.
 
@@ -10,7 +11,6 @@ configura estas variables con los mismos valores que en el backend:
 
 ```dotenv
 CLIMATE_DOMAIN=analisissistemas2026proyecto.xyz
-TRAEFIK_NETWORK=traefik-proxy
 ```
 
 Desde esta carpeta en el VPS, con Docker Compose 2.24.4 o posterior:
