@@ -6,14 +6,7 @@ services:
     ports:
       - "4200:4200"
     environment:
-      GATEWAY_PUBLIC_URL: "http://179.236.231.32:18080"
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.climate-monitoring.rule=Host(`analisissistemas2026proyecto.xyz`)
-      - traefik.http.routers.climate-monitoring.entrypoints=websecure
-      - traefik.http.routers.climate-monitoring.tls=true
-      - traefik.http.routers.climate-monitoring.tls.certresolver=letsencrypt
-      - traefik.http.services.climate-monitoring.loadbalancer.server.port=4200
+      GATEWAY_PUBLIC_URL: "https://${CLIMATE_DOMAIN:-analisissistemas2026proyecto.xyz}"
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
