@@ -7,6 +7,7 @@ import { EventStatistics } from '../events/models/event.models';
 import { SensorReadingResponse, SensorType, SimulationStatusResponse } from '../monitoring/models/monitoring.models';
 import { SensorResponse } from '../sensors/models/sensor.models';
 export interface DashboardSummary {
+  climateStatistics?: {sensorType: SensorType; unit: string; count: number; average: number; minimum: number; maximum: number}[];
   communityCount: number; activeSensorCount: number; inactiveSensorCount: number; activeAlertCount: number;
   byAlertLevel: Record<string, number>; communities: CommunityResponse[]; sensors: SensorResponse[];
   alerts: AlertResponse[]; readings: SensorReadingResponse[]; simulation: SimulationStatusResponse; events: EventStatistics;

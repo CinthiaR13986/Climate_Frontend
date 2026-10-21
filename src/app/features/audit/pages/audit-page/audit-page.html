@@ -127,5 +127,6 @@
         </table>
       </div>
     </section>
+    <nav aria-label="Paginas de auditoria" class="flex items-center gap-4"><button class="rounded-lg border px-3 py-2 disabled:opacity-50" [disabled]="loading() || page() === 1" (click)="changePage(-1)">Anterior</button><span>Pagina {{ page() }}</span><button class="rounded-lg border px-3 py-2 disabled:opacity-50" [disabled]="loading() || records().length < 100" (click)="changePage(1)">Siguiente</button></nav>
   }
 </div>

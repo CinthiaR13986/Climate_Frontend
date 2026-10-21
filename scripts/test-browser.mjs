@@ -21,7 +21,7 @@ page.on('request', request => {
 });
 async function audit(name) {
   await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
-  const result = await page.evaluate(async () => window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa'] } }));
+  const result = await page.evaluate(async () => window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }));
   const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, description: v.description, nodes: v.nodes.map(n => ({ target: n.target, summary: n.failureSummary })) }));
   reports.push({ name, violations });
   await writeFile(resolve(artifacts, 'accessibility.json'), JSON.stringify(reports, null, 2));
@@ -43,6 +43,14 @@ try {
   for (const [route, heading] of [['dashboard','Monitoreo climático'], ['communities','Comunidades'], ['sensors','Sensores'], ['alert-rules','Reglas de alerta'], ['alerts','Alertas'], ['events','Historial de eventos'], ['users','Usuarios'], ['audit','Bitácora de auditoría'], ['readings','Lecturas históricas']]) {
     await visit(route, heading);
   }
+  await visit('reports','Reportes');
+  await page.locator('select[name="type"]').selectOption('COMMUNITIES');
+  await page.getByRole('button',{name:'Generar PDF',exact:true}).click();
+  const reportDownload=page.getByRole('button',{name:'Descargar PDF',exact:true}).first();
+  await reportDownload.waitFor({timeout:45000});
+  const pdfDownload=page.waitForEvent('download');await reportDownload.click();
+  assert.match((await pdfDownload).suggestedFilename(),/\.pdf$/);
+  await audit('reports-generated');
   await page.goto(`${origin}/alert-rules/new`);
   await page.getByRole('heading', { name: 'Crear regla', exact: true }).waitFor();
   await audit('rule-form');

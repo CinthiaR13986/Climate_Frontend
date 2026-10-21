@@ -18,6 +18,7 @@ export const routes: Routes = [
     component: AppShell,
     canActivate: [authGuard],
     children: [
+      { path: 'reports', loadComponent: () => import('./features/reports/reports-page').then(m => m.ReportsPage), data: { pageTitle: 'Reportes' }, title: 'Reportes | Climate Monitoring' },
       {
         path: 'dashboard',
         loadComponent: () => import('./features/dashboard/pages/dashboard-page/dashboard-page').then(component => component.DashboardPage),

@@ -10,6 +10,8 @@ export class AuditApiService {
   private readonly config = inject(APP_CONFIG);
   getAll(filters: AuditFilters = {}): Observable<AuditResponse[]> {
     let params = new HttpParams();
+    if (filters.page) params = params.set('page', filters.page);
+    if (filters.pageSize) params = params.set('pageSize', filters.pageSize);
     if (filters.userId) params = params.set('userId', filters.userId);
     if (filters.action) params = params.set('action', filters.action);
     if (filters.resource) params = params.set('resource', filters.resource);

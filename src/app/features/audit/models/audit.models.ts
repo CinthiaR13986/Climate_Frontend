@@ -12,6 +12,8 @@ export interface AuditResponse {
 }
 
 export interface AuditFilters {
+  readonly page?: number;
+  readonly pageSize?: number;
   readonly userId?: string;
   readonly action?: string;
   readonly resource?: string;

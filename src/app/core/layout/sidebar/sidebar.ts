@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, inject, output, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../auth/auth.store';
 import { AuthService } from '../../auth/auth.service';
@@ -8,6 +8,7 @@ import { ADMIN_NAV, MONITORING_NAV } from '../navigation.model';
 @Component({
   selector: 'app-sidebar',
   imports: [RouterLink, RouterLinkActive, NavIcon],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sidebar.html',
 })
 export class Sidebar {

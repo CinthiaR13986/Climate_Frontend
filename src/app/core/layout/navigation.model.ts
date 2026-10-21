@@ -6,6 +6,7 @@ export const MONITORING_NAV: readonly NavItem[] = [
   { label: 'Reglas de alerta', path: '/alert-rules', icon: 'alerts' },
   { label: 'Lecturas', path: '/readings', icon: 'monitoring' },
   { label: 'Historial', path: '/events', icon: 'events' },
+  { label: 'Reportes', path: '/reports', icon: 'events' },
 ];
 export const ADMIN_NAV: readonly NavItem[] = [
   { label: 'Usuarios', path: '/users', icon: 'users' }, { label: 'Auditoría', path: '/audit', icon: 'audit' },

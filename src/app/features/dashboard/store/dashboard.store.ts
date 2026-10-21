@@ -24,6 +24,8 @@ export class DashboardStore {
     return keys.map(key => { const rows = points.filter(p => `${p.sensorType}|${p.unit}` === key); return { type: rows[0].sensorType, sensorId: key, unit: rows[0].unit, data: rows.map(p => ({ timestamp: p.timestamp, value: p.value })) }; });
   });
   readonly byLevel = computed(() => Object.entries(this.summary()?.byAlertLevel ?? {}));
+  readonly byRisk = computed(() => Object.entries(this.summary()?.events.byRiskType ?? {}));
+  readonly climateStatistics = computed(() => this.summary()?.climateStatistics ?? []);
   selectCommunity(id: string): void { this.communityId.set(id); this.request?.unsubscribe(); this.loading.set(false); this.readingsState.set([]); this.alertsState.set([]); this.sensorsState.set([]); this.load(); }
   private readonly realtime = inject(RealtimeService);
   private readonly destroyRef = inject(DestroyRef);

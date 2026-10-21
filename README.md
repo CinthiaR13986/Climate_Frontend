@@ -1,11 +1,13 @@
 # Climate Monitoring Web
 
+Entrega de Fase 3: [guía actual](FASE_3_ENTREGA.md) y [documentación Word](docs/angular-components/Documentacion_Componentes_Angular.docx). El Word conserva las explicaciones anteriores como anexo histórico.
+
 Frontend web del Sistema de Monitoreo Climático. Consume el Gateway .NET, presenta métricas y alertas, administra catálogos según el rol y recibe actualizaciones mediante SignalR.
 
 ## Tecnologías
 
-- Angular 21 con componentes standalone, Signals y rutas lazy.
-- TypeScript 5.9 estricto, Tailwind CSS 4 y SCSS.
+- Angular 22.2.3 con componentes standalone, Signals y rutas lazy.
+- TypeScript 6.0 estricto, Tailwind CSS 4 y SCSS.
 - Chart.js y RxJS.
 - Vitest y Angular HTTP Testing.
 - Servidor HTTP Node.js sin privilegios para producción.
@@ -14,8 +16,8 @@ Frontend web del Sistema de Monitoreo Climático. Consume el Gateway .NET, prese
 
 Para ejecución local:
 
-- Node.js 22.12 o superior.
-- npm 10 o superior.
+- Node.js ^22.22.3 o ^24.15.0 (validado con 24.21.0).
+- npm 11 recomendado (validado con 11.21.1; npm10 del equipo falló durante la migración).
 - Gateway disponible en `http://localhost:8080`.
 
 Para Docker:
@@ -31,7 +33,15 @@ Este frontend no contiene base de datos ni credenciales. Levanta el backend desd
 http://localhost:8080
 ```
 
-Las credenciales iniciales se obtienen de `ADMIN_SEED_USERNAME` y `ADMIN_SEED_PASSWORD` en la configuración del backend. No copies esa contraseña al código o a archivos versionados del frontend.
+En Fase 3, las credenciales iniciales de una instalación nueva usan ADMIN_SEED_USERNAME y AUTH_ADMIN_SEED_PASSWORD del backend. Durante la migración se conservan usuarios/hashes existentes. No copies contraseñas al frontend.
+
+Reportería está en `/reports`: ocho tipos, filtros, trabajos asíncronos, historial paginado, detalle y descarga para Administrator. Operator genera y consulta sus trabajos; Viewer consulta los propios. Dashboard muestra acceso y conteos agregados. Los PDFs se generan en backend.
+
+El cierre incluye filtros pertinentes por reporte, estados de carga/error/vacío, recuperación del historial, distribución de eventos por fenómeno y estadísticas SQL del dashboard por tipo/unidad para las últimas24 horas. WCAG2.2 AA se incluye en las pruebas axe. Arranque local nuevo desde backend con `scripts/Start-Phase3.ps1 -NoBuild`; credenciales privadas en backend/.env.phase3.local. VPS y datos anteriores no son requisitos de esta entrega.
+
+La migración oficial `ng update @angular/core@22 @angular/cli@22 angular-eslint@22 --allow-dirty` ejecutó schematics de core/CLI (cambio de detección, HTTP y configuración TypeScript). Tras revisar componentes basados en signals/inputs se adoptó OnPush. Se preservaron las eliminaciones previas de docs del repositorio.
+
+Prueba de interfaz de reportes: `node scripts/test-reports-browser.mjs` (requiere Edge o BROWSER_CHANNEL). Respuestas API controladas, tres roles, móvil/escritorio, generación/descarga y axe; las pruebas con PDFs y servicios reales están en backend/scripts/Test-Phase3System.ps1 -Reports.
 
 ## Ejecutar localmente
 

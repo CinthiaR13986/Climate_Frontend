@@ -1,5 +1,16 @@
 import { ModalDirective } from '../../../shared/directives/modal.directive';
-import { Component, effect, ElementRef, HostListener, inject, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  effect,
+  ElementRef,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  viewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';
 import { Topbar } from '../topbar/topbar';
@@ -8,6 +19,7 @@ import { RealtimeService } from '../../realtime/realtime.service';
 @Component({
   selector: 'app-shell',
   imports: [ModalDirective, RouterOutlet, Sidebar, Topbar],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './app-shell.html',
 })
 export class AppShell implements OnInit, OnDestroy {
@@ -21,9 +33,15 @@ export class AppShell implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void { void this.realtime.start(); }
-  ngOnDestroy(): void { this.realtime.stop(); }
+  ngOnInit(): void {
+    void this.realtime.start();
+  }
+  ngOnDestroy(): void {
+    this.realtime.stop();
+  }
 
   @HostListener('document:keydown.escape')
-  protected closeMenu(): void { this.menuOpen.set(false); }
+  protected closeMenu(): void {
+    this.menuOpen.set(false);
+  }
 }

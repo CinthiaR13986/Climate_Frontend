@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthStore } from './core/auth/auth.store';
 import { ToastContainer } from './shared/components/toast-container/toast-container';
@@ -7,7 +7,8 @@ import { ToastContainer } from './shared/components/toast-container/toast-contai
   selector: 'app-root',
   imports: [RouterOutlet, ToastContainer],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './app.scss',
 })
 export class App {
   private readonly authStore = inject(AuthStore);
